@@ -42,17 +42,6 @@ class Database:
                     result = await connection.execute(command, *args)
             return result
 
-    async def create_table_users(self):
-        sql = """
-        CREATE TABLE IF NOT EXISTS Users (
-        id SERIAL PRIMARY KEY,
-        full_name VARCHAR(255) NOT NULL,
-        username varchar(255) NULL,
-        telegram_id BIGINT NOT NULL UNIQUE
-        );
-        """
-        await self.execute(sql, execute=True)
-
     @staticmethod
     def format_args(sql, parameters: dict):
         sql += " AND ".join(
@@ -72,6 +61,18 @@ class Database:
         sql = "SELECT * FROM Users WHERE "
         sql, parameters = self.format_args(sql, parameters=kwargs)
         return await self.execute(sql, *parameters, fetchrow=True)
+
+    async def get_method_by_name(self, name):
+        sql = "SELECT * FROM methods WHERE name=$1"
+        return await self.execute(sql, name, fetch=True)
+
+    async def get_fields_by_method(self, method_id):
+        sql = "SELECT * FROM fields WHERE method_id=$1"
+        return await self.execute(sql, method_id, fetch=True)
+
+    async def get_ads_chats(self):
+        sql = "SELECT * FROM ads_chats"
+        return await self.execute(sql, fetch=True)
 
     async def count_users(self):
         sql = "SELECT COUNT(*) FROM Users"
